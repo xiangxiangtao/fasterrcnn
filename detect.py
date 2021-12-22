@@ -41,6 +41,45 @@ from lib.model.faster_rcnn.resnet import resnet
 import pdb
 
 
+thresh = 0.8  #################################################################
+visual_score_thresh = thresh
+
+test_path_composite = '/home/ecust/txx/dataset/gas/IR/composite/composite_gas_gmy_500_400/test/image'
+test_path_composite_1 = '/home/ecust/txx/dataset/gas/IR/composite/composite_gas_1_gmy_500_400/test/image'
+test_path_composite_2 = '/home/ecust/txx/dataset/gas/IR/composite/composite_gas_2_gmy_500_400/test/image'
+
+test_path_real_annotated = '/home/ecust/txx/dataset/gas/IR/real/real_annotated/test/image'
+test_path_real_annotated_1 = '/home/ecust/txx/dataset/gas/IR/real/real_annotated_1/test/image'
+test_path_real_annotated_gmy = '/home/ecust/txx/dataset/gas/IR/real/real_annotated_gmy/val/image'
+test_path_real_6 = 'data/dataset/real/real_6_gmy/test/image'
+test_path_real_annotated_all = '/workspace/fasterrcnn_txx/data/dataset/real/real_annotated_all_split_gmy/all/image'
+
+test_path_list1=[test_path_composite,test_path_composite_1,test_path_composite_2]
+test_path_list2=[test_path_real_annotated,test_path_real_annotated_1,test_path_real_annotated_gmy,test_path_real_6]
+
+test_path=test_path_real_annotated_all##########################################
+print("test_path=",test_path)
+
+# if test_path in test_path_list1:
+#   class_names=['gas']
+# elif test_path in test_path_list2:
+#   class_names=['smoke']
+# print("class_names=",class_names)
+
+train_dataset="composite9.1"####################
+weight_path="models/res101/weight_fasterrcnn_composite9.1/faster_rcnn_align_6.pth"###########################
+
+dataset_name=test_path.split("/")[-3]
+dataset_split=test_path.split("/")[-2]
+
+output_folder_detection=os.path.join("detection","{}_{}".format(dataset_name,dataset_split),"fasterrcnn_train_on_{}_confthresh{}".format(train_dataset,thresh))
+os.makedirs(output_folder_detection, exist_ok=True)
+
+
+
+
+
+
 # try:
 #     xrange          # Python 2
 # except NameError:
@@ -53,12 +92,13 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
     parser.add_argument('--dataset', dest='dataset',default='pascal_voc', type=str,help='training dataset')
-    parser.add_argument('--cfg', dest='cfg_file',default='cfgs/vgg16.yml', type=str,help='optional config file')
-    parser.add_argument('--net', dest='net', default='vgg16', type=str,help='vgg16, res50, res101, res152')
+    # parser.add_argument('--cfg', dest='cfg_file',default='cfgs/vgg16.yml', type=str,help='optional config file')
+    parser.add_argument('--cfg', dest='cfg_file', default='cfgs/res101.yml', type=str, help='optional config file')
+    parser.add_argument('--net', dest='net', default='res101', type=str,help='vgg16, res50, res101, res152')
     parser.add_argument('--set', dest='set_cfgs',default=None,help='set config keys', nargs=argparse.REMAINDER)
-    parser.add_argument('--load_dir', dest='load_dir',default="models",help='directory to load models')
-    parser.add_argument('--image_dir', dest='image_dir',default="data/samples",help='directory to load images for demo')
-    parser.add_argument('--output_dir', dest='output_dir', default="output_image", help='directory to load images for demo')
+    # parser.add_argument('--load_dir', dest='load_dir',default="models",help='directory to load models')
+    parser.add_argument('--image_dir', dest='image_dir',default=test_path,help='directory to load images for demo')
+    parser.add_argument('--output_dir', dest='output_dir', default=output_folder_detection, help='directory to load images for demo')
     parser.add_argument('--cuda', dest='cuda',default=True,action='store_true',help='whether use CUDA')
     parser.add_argument('--mGPUs', dest='mGPUs',action='store_true',help='whether use multiple GPUs')
     parser.add_argument('--cag', dest='class_agnostic',action='store_true',help='whether perform class_agnostic bbox regression')
@@ -88,6 +128,7 @@ def _get_image_blob(im):
         in the image pyramid
     """
     im_orig = im.astype(np.float32, copy=True)
+    # im_orig = im_orig[:,:,:3]
     im_orig -= cfg.PIXEL_MEANS
 
     im_shape = im_orig.shape
@@ -117,8 +158,8 @@ if __name__ == '__main__':
 
     args = parse_args()
 
-    print('Called with args:')
-    print(args)
+    # print('Called with args:')
+    # print(args)
 
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
@@ -131,19 +172,21 @@ if __name__ == '__main__':
     print(cfg['POOLING_MODE'])
     np.random.seed(cfg.RNG_SEED)
 
+    os.makedirs(args.output_dir, exist_ok=True)
+
     # train set
     # -- Note: Use validation set and disable the flipped to enable faster loading.
 
-    input_dir = args.load_dir + "/" + args.net + "/" + args.dataset
-    if not os.path.exists(input_dir):
-        raise Exception('There is no input directory for loading network from ' + input_dir)
+    # input_dir = args.load_dir + "/" + args.net + "/" + args.dataset
+    # if not os.path.exists(input_dir):
+    #     raise Exception('There is no input directory for loading network from ' + input_dir)
 
-    load_name = os.path.join(input_dir,
-                             'faster_rcnn_{}_best.pth'.format(cfg['POOLING_MODE']))
+    # load_name = os.path.join(input_dir,'faster_rcnn_{}_best.pth'.format(cfg['POOLING_MODE']))
+    load_name=weight_path
 
     classes = np.asarray(['__background__',  # always index 0
-                         'crazing', 'inclusion', 'patches',
-                         'pitted_surface', 'rolled-in_scale', 'scratches'])
+                         'gas'])
+    print("classes=",classes)
 
     # initilize the network here.
     if args.net == 'vgg16':
@@ -199,9 +242,9 @@ if __name__ == '__main__':
 
     start = time.time()
     max_per_image = 100
-    thresh = 0.05
-    # vis = True
-    vis = False
+
+    vis = True
+    # vis = False
 
 
     imglist = os.listdir(args.image_dir)
@@ -211,11 +254,18 @@ if __name__ == '__main__':
     print('Loaded Photo: {} images.'.format(num_images))
 
     cmap = plt.get_cmap("tab20b")
-    colors = [cmap(i) for i in np.linspace(0, 1, 7)]
+    # colors = [cmap(i) for i in np.linspace(0, 1, 7)]
+    colors = [(0, 0, 0), (1, 1, 0)]
     # print(colors)
 
-    for img in imglist:
+    sum_time=0
 
+    for i,img in enumerate(imglist):
+        print("-"*50)
+        # if i>20:
+        #   break;
+        print("batch",i)
+        print("img=",img)
         total_tic = time.time()
 
         im_file = os.path.join(args.image_dir, img)
@@ -225,6 +275,7 @@ if __name__ == '__main__':
             im_in = im_in[:, :, np.newaxis]
             im_in = np.concatenate((im_in, im_in, im_in), axis=2)
         # rgb -> bgr
+        im_in=im_in[:,:,:3]
         im = im_in[:, :, ::-1]
 
         blobs, im_scales = _get_image_blob(im)
@@ -290,6 +341,7 @@ if __name__ == '__main__':
         detect_time = det_toc - det_tic
         # print('detect_time:{}'.format(detect_time))
         misc_tic = time.time()
+        
         if vis:
             im2show = np.copy(im)
             plt.figure()
@@ -319,7 +371,7 @@ if __name__ == '__main__':
 
                         bbox = tuple(int(np.round(x)) for x in dets[i, :4])
                         score = dets[i, -1]
-                        if score > 0.5:
+                        if score > visual_score_thresh:
                             x1=bbox[0] if bbox[0]>0 else 0
                             y1=bbox[1] if bbox[1]>0 else 0
                             x2=bbox[2]
@@ -330,15 +382,15 @@ if __name__ == '__main__':
                             # color = bbox_colors[int(np.where(unique_labels == int(cls_pred))[0])]
                             color = colors[j]
                             # Create a Rectangle patch
-                            bbox = patches.Rectangle((x1, y1), box_w, box_h, linewidth=2, edgecolor=color, facecolor="none")
+                            bbox = patches.Rectangle((x1, y1), box_w, box_h, linewidth=3, edgecolor=color, facecolor="none")
                             # Add the bbox to the plot
                             ax.add_patch(bbox)
                             # Add label
                             plt.text(
                                 x1,
                                 y1,
-                                s=classes[j],
-                                color="white",
+                                s=classes[j]+" {:.2f}".format(score),
+                                color="red",
                                 verticalalignment="top",
                                 bbox={"color": color, "pad": 0},
                             )
@@ -347,13 +399,13 @@ if __name__ == '__main__':
         nms_time = misc_toc - misc_tic
         total_time = detect_time + nms_time
         # print('nms_time:{}'.format(nms_time))
-        print('total_time:{}'.format(total_time))
+        # print('total_time:{}'.format(total_time))
+        sum_time+=total_time
+
 
 
         if vis :
-            outdir = args.output_dir + '/' + cfg['POOLING_MODE']
-            os.makedirs(outdir, exist_ok=True)
-            result_path = os.path.join(outdir, img)
+            result_path = os.path.join(args.output_dir, img)
             plt.axis("off")
             plt.gca().xaxis.set_major_locator(NullLocator())
             plt.gca().yaxis.set_major_locator(NullLocator())
@@ -371,3 +423,4 @@ if __name__ == '__main__':
         #     if cv2.waitKey(1) & 0xFF == ord('q'):
         #         break
 
+    print("FPS:{}".format(len(imglist)/sum_time))

@@ -42,8 +42,8 @@ except NameError:
     xrange = range  # Python 3
 
 
-def generate_anchors(base_size=16, ratios=[0.5, 1, 2],
-                     scales=2**np.arange(3, 6)):
+def generate_anchors(base_size: object = 16, ratios: object = [0.5, 1, 2],
+                     scales: object = 2 ** np.arange(3, 6)) -> object:
     """
     Generate anchor (reference) windows by enumerating aspect ratios X
     scales wrt a reference (0, 0, 15, 15) window.

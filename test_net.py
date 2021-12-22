@@ -48,7 +48,7 @@ def parse_args():
   parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
   parser.add_argument('--dataset', dest='dataset',default='pascal_voc', type=str,help='training dataset')
   parser.add_argument('--cfg', dest='cfg_file',default='cfgs/vgg16.yml', type=str,help='optional config file')
-  parser.add_argument('--net', dest='net',default='res101', type=str ,help='vgg16, res50, res101, res152')
+  parser.add_argument('--net', dest='net',default='vgg16', type=str ,help='vgg16, res50, res101, res152')#################
   parser.add_argument('--set', dest='set_cfgs', default=None,nargs=argparse.REMAINDER, help='set config keys')
   parser.add_argument('--load_dir', dest='load_dir', default="models",type=str,help='directory to load models')
   parser.add_argument('--cuda', dest='cuda', action='store_true',help='whether use CUDA')
@@ -80,7 +80,7 @@ if __name__ == '__main__':
   np.random.seed(cfg.RNG_SEED)
   if args.dataset == "pascal_voc":
       args.imdb_name = "voc_2007_train"
-      args.imdbval_name = "voc_2007_valid"
+      args.imdbtest_name = "voc_2007_test"
       args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
   elif args.dataset == "pascal_voc_0712":
       args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
@@ -118,8 +118,9 @@ if __name__ == '__main__':
   input_dir = args.load_dir + "/" + args.net + "/" + args.dataset
   if not os.path.exists(input_dir):
     raise Exception('There is no input directory for loading network from ' + input_dir)
-  load_name = os.path.join(input_dir,
-    'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
+  # load_name = os.path.join(input_dir,
+  #   'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
+  load_name = os.path.join("/workspace/fasterrcnn_txx/weights/weight_fasterrcnn_composite6_pool_7_colab.pth")
 
   # initilize the network here.
   if args.net == 'vgg16':

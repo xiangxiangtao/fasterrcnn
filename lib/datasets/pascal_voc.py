@@ -36,13 +36,92 @@ from lib.model.utils.config import cfg
 #     xrange = range  # Python 3
 # <<<< obsolete
 
+iou_thresh=0.5########################################################################
+
+dataset_name_composite='composite_gas_gmy_500_400'
+dataset_name_composite_1='composite_gas_1_gmy_500_400'
+dataset_name_composite_2='composite_gas_2_gmy_500_400'
+dataset_name_composite_6='composite_gas_6_gmy_500_400'
+dataset_name_composite_8='composite8_gmy'
+dataset_name_composite_8_point_1='composite8.1_gmy'
+dataset_name_composite_8_point_2='composite_8.2_gmy'
+dataset_name_composite_8_point_3='composite_8.3_gmy'
+dataset_name_composite_8_point_4='composite_8.4_gmy'
+dataset_name_composite_8_point_5='composite_8.5_gmy'
+dataset_name_composite_9_point_1='composite_9.1_gmy'
+dataset_name_composite_9_point_2='composite_9.2_gmy'
+dataset_name_composite_9_point_3='composite_9.3_gmy'
+dataset_name_composite_9_point_4='composite_9.4_gmy'
+dataset_name_composite_9_point_5='composite_9.5_gmy'
+dataset_name_composite_9_point_6='composite_9.6_gmy'
+dataset_name_composite_9_point_7='composite_9.7_gmy'
+dataset_name_composite_9_point_8='composite_9.8_gmy'
+dataset_name_composite_9_point_9='composite_9.9_gmy'
+dataset_name_composite_9_point_10='composite_9.10_gmy'
+dataset_name_composite_9_point_11='composite_9.11_gmy'
+dataset_name_composite_9_point_12='composite_9.12_gmy'
+dataset_name_composite_8_point_6='composite_8.6_gmy'
+dataset_name_composite_10_point_1='composite_10.1_gmy'
+dataset_name_composite_11_point_1='composite_11.1_gmy'
+dataset_name_composite_12_point_1='composite_12.1_gmy'
+dataset_name_composite_13_point_1='composite_13.1_gmy'
+dataset_name_composite_14_point_1='composite_14.1_gmy'
+dataset_name_composite_15_point_1='composite_15.1_gmy'
+
+dataset_name_real_annotated='real_annotated'
+dataset_name_real_annotated_1='real_annotated_1'
+dataset_name_real_annotated_2='real_annotated_2'
+dataset_name_real_3='real_3_gmy'
+dataset_name_real_5='real_5_gmy'
+dataset_name_real_6='real_6_gmy'
+dataset_name_real_annotated_gmy='real_annotated_gmy'
+dataset_name_real_annotated_gmy_all='real_annotated_gmy_all'
+dataset_name_real_annotated_all_split_gmy='real_annotated_all_split_gmy'
+
+dataset_name=dataset_name_composite_15_point_1###########################################
+# dataset_name=dataset_name_real_6
+# dataset_name=dataset_name_real_annotated_all_split_gmy
+
+
+dataset_list0=[dataset_name_composite,dataset_name_composite_1,dataset_name_composite_2,dataset_name_composite_6,dataset_name_composite_8,
+               dataset_name_composite_8_point_1,dataset_name_composite_8_point_2,dataset_name_composite_8_point_3,dataset_name_composite_8_point_4,
+               dataset_name_composite_8_point_5,dataset_name_composite_9_point_1,dataset_name_composite_9_point_2,dataset_name_composite_9_point_3,
+               dataset_name_composite_9_point_4,dataset_name_composite_9_point_5,dataset_name_composite_9_point_6,dataset_name_composite_9_point_7,
+               dataset_name_composite_9_point_8,dataset_name_composite_9_point_9,dataset_name_composite_9_point_10,dataset_name_composite_9_point_11,
+               dataset_name_composite_9_point_12,dataset_name_composite_8_point_6,dataset_name_composite_10_point_1,dataset_name_composite_11_point_1,
+               dataset_name_composite_12_point_1,dataset_name_composite_13_point_1,dataset_name_composite_14_point_1,dataset_name_composite_15_point_1]
+dataset_list1=[dataset_name_real_annotated_gmy,dataset_name_real_annotated,dataset_name_real_annotated_1,dataset_name_real_annotated_2,
+               dataset_name_real_3,dataset_name_real_5,dataset_name_real_6,dataset_name_real_annotated_gmy_all,dataset_name_real_annotated_all_split_gmy]
+if dataset_name in dataset_list0:
+    myclass='gas'
+    img_ext='jpg'
+    dataset_mode="composite"
+elif dataset_name in dataset_list1:
+    myclass='smoke'
+    img_ext='png'
+    dataset_mode = "real"
+else:
+    print('dataset name error!!!')
+
 
 class pascal_voc(imdb):
-    def __init__(self, image_set, year, devkit_path=None):
+    def __init__(self, image_set, year, devkit_path="data/dataset/{}".format(dataset_mode)):##
+        print("*"*10)
+        print("running in pascal_voc.py...")
+        # print("cache_path=",self.cache_path)
+        
         imdb.__init__(self, 'voc_' + year + '_' + image_set)
         self._year = year
+        if dataset_name in [dataset_name_real_annotated_all_split_gmy]:
+            image_set = "72"############################################################################################for real_annotated_all_split_gmy
         self._image_set = image_set
+        if dataset_name==dataset_name_real_annotated_gmy and (self._image_set in ["val","test"]):
+          self._image_set="val"
+        print("current_image_set={}".format(self._image_set))
         self._devkit_path = self._get_default_path() if devkit_path is None else devkit_path
+        os.makedirs(self._devkit_path, exist_ok=True)
+        # print("current__devkit_path={}".format(self._devkit_path))
+
         # self._data_path = os.path.join(self._devkit_path, 'VOC' + self._year)
         # self._classes = ('__background__',  # always index 0
         #                  'aeroplane', 'bicycle', 'bird', 'boat',
@@ -50,13 +129,30 @@ class pascal_voc(imdb):
         #                  'cow', 'diningtable', 'dog', 'horse',
         #                  'motorbike', 'person', 'pottedplant',
         #                  'sheep', 'sofa', 'train', 'tvmonitor')
-        self._data_path = os.path.join(self._devkit_path, 'data', 'NEU-DET', self._image_set)
-        self._classes = ('__background__',  # always index 0
-                         'crazing', 'inclusion', 'patches',
-                         'pitted_surface', 'rolled-in_scale', 'scratches')
+
+        # self._data_path = os.path.join(self._devkit_path, 'data', 'IR', self._image_set)
+
+
+
+        self._data_path = os.path.join(self._devkit_path, dataset_name, self._image_set)
+        # self._data_path = os.path.join(self._devkit_path, dataset_name, "73")##################################################used for test single environment
+        print("current_dataset_path={}".format(self._data_path))
+
+
+
+
+        # self._data_path = os.path.join(self._devkit_path, 'real_annotated', self._image_set)#######))
+        # self._classes = ('__background__',  # always index 0
+        #                  'crazing', 'inclusion', 'patches',
+        #                  'pitted_surface', 'rolled-in_scale', 'scratches')
+        
+        self._classes = ('__background__', '{}'.format(myclass))
+        print("current_classes={}".format(self._classes))
 
         self._class_to_ind = dict(zip(self.classes, range(self.num_classes)))
-        self._image_ext = '.jpg'
+
+        self._image_ext = '.{}'.format(img_ext)
+
         self._image_index = self._load_image_set_index()
         # Default to roidb handler
         # self._roidb_handler = self.selective_search_roidb
@@ -115,8 +211,8 @@ class pascal_voc(imdb):
         """
         Return the default path where PASCAL VOC is expected to be installed.
         """
-        return '/home/ecust/gmy/faster-rcnn.pytorch-pytorch-1.0/faster-rcnn.pytorch-pytorch-1.0'
-
+        # return '/home/ecust/txx/project/gmy_2080_copy/faster-rcnn.pytorch-pytorch-1.0/faster-rcnn.pytorch-pytorch-1.0'
+        return "/workspace/fasterrcnn_txx"###########################
 
 
     def gt_roidb(self):
@@ -125,8 +221,13 @@ class pascal_voc(imdb):
 
         This function loads/saves from/to a cache file to speed up future calls.
         """
-        cache_file = os.path.join(self.cache_path, self.name + '_gt_roidb.pkl')
+        cache_folder=os.path.join(self.cache_path, dataset_name)
+        if not os.path.exists(cache_folder):
+          os.makedirs(cache_folder)
+        cache_file = os.path.join(cache_folder,'{}_gt_roidb.pkl'.format(self._image_set))#################
+        print('cache_dir=',cache_file)
         if os.path.exists(cache_file):
+            print("------")
             with open(cache_file, 'rb') as fid:
                 roidb = pickle.load(fid)
             print('{} gt roidb loaded from {}'.format(self.name, cache_file))
@@ -147,8 +248,7 @@ class pascal_voc(imdb):
 
         This function loads/saves from/to a cache file to speed up future calls.
         """
-        cache_file = os.path.join(self.cache_path,
-                                  self.name + '_selective_search_roidb.pkl')
+        cache_file = os.path.join(self.cache_path, dataset_name + '_selective_search_roidb.pkl')####################
 
         if os.path.exists(cache_file):
             with open(cache_file, 'rb') as fid:
@@ -236,10 +336,10 @@ class pascal_voc(imdb):
         for ix, obj in enumerate(objs):
             bbox = obj.find('bndbox')
             # Make pixel indexes 0-based
-            x1 = float(bbox.find('xmin').text) - 1
-            y1 = float(bbox.find('ymin').text) - 1
-            x2 = float(bbox.find('xmax').text) - 1
-            y2 = float(bbox.find('ymax').text) - 1
+            x1 = float(bbox.find('xmin').text)
+            y1 = float(bbox.find('ymin').text)
+            x2 = float(bbox.find('xmax').text)
+            y2 = float(bbox.find('ymax').text)
 
             diffc = obj.find('difficult')
             difficult = 0 if diffc == None else int(diffc.text)
@@ -279,7 +379,7 @@ class pascal_voc(imdb):
         for cls_ind, cls in enumerate(self.classes):
             if cls == '__background__':
                 continue
-            print('Writing {} VOC results file'.format(cls))
+            # print('Writing {} VOC results file'.format(cls))
             filename = self._get_voc_results_file_template().format(cls)
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
@@ -294,16 +394,20 @@ class pascal_voc(imdb):
                                        dets[k, 2] + 1, dets[k, 3] + 1))
 
     def _do_python_eval(self, output_dir='output'):
-
+        # print("+"*100)
+        print("_do_python_eval...")
         annopath = os.path.join(self._data_path, 'label', '{:s}.xml')
         imagesetfile = os.path.join(self._data_path, 'image')
+        # imagesetfile = os.path.join('{}_{}'.format(dataset_name, self._image_set))
+        # print("imagesetfile=",imagesetfile)
 
-        cachedir = os.path.join(self._devkit_path, 'result', 'annotations_cache')
+        # cachedir = os.path.join(self._devkit_path, 'result', 'annotations_cache')
+        cache_folder = os.path.join(self.cache_path, dataset_name)
         aps = []
         # The PASCAL VOC metric changed in 2010
         # use_07_metric = True if int(self._year) < 2010 else False
         use_07_metric = False
-        print('VOC07 metric? ' + ('Yes' if use_07_metric else 'No'))
+        # print('VOC07 metric? ' + ('Yes' if use_07_metric else 'No'))
         if not os.path.isdir(output_dir):
             os.mkdir(output_dir)
         for i, cls in enumerate(self._classes):
@@ -311,7 +415,7 @@ class pascal_voc(imdb):
                 continue
             filename = self._get_voc_results_file_template().format(cls)
             rec, prec, ap = voc_eval(
-                filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
+                filename, annopath, imagesetfile, cls, cache_folder, ovthresh=iou_thresh,
                 use_07_metric=use_07_metric)
             aps += [ap]
             print('AP for {} = {:.4f}'.format(cls, ap))
@@ -324,13 +428,13 @@ class pascal_voc(imdb):
             print('{:.3f}'.format(ap))
         print('{:.3f}'.format(np.mean(aps)))
         print('~~~~~~~~')
-        print('')
-        print('--------------------------------------------------------------')
-        print('Results computed with the **unofficial** Python eval code.')
-        print('Results should be very close to the official MATLAB eval code.')
-        print('Recompute with `./tools/reval.py --matlab ...` for your paper.')
-        print('-- Thanks, The Management')
-        print('--------------------------------------------------------------')
+        # print('')
+        # print('--------------------------------------------------------------')
+        # print('Results computed with the **unofficial** Python eval code.')
+        # print('Results should be very close to the official MATLAB eval code.')
+        # print('Recompute with `./tools/reval.py --matlab ...` for your paper.')
+        # print('-- Thanks, The Management')
+        # print('--------------------------------------------------------------')
         return np.mean(aps)
 
     def _do_matlab_eval(self, output_dir='output'):

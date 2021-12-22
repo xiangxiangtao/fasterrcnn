@@ -84,7 +84,7 @@ __C.TRAIN.FG_THRESH = 0.5
 # Overlap threshold for a ROI to be considered background (class = 0 if
 # overlap in [LO, HI))
 __C.TRAIN.BG_THRESH_HI = 0.5
-__C.TRAIN.BG_THRESH_LO = 0.1
+__C.TRAIN.BG_THRESH_LO = 0.0
 
 # Use horizontally-flipped images during training?
 __C.TRAIN.USE_FLIPPED = True
@@ -144,7 +144,7 @@ __C.TRAIN.RPN_PRE_NMS_TOP_N = 12000
 # Number of top scoring boxes to keep after applying NMS to RPN proposals
 __C.TRAIN.RPN_POST_NMS_TOP_N = 2000
 # Proposal height and width both need to be greater than RPN_MIN_SIZE (at orig image scale)
-__C.TRAIN.RPN_MIN_SIZE = 8
+__C.TRAIN.RPN_MIN_SIZE = 0
 # Deprecated (outside weights)
 __C.TRAIN.RPN_BBOX_INSIDE_WEIGHTS = (1.0, 1.0, 1.0, 1.0)
 # Give the positive RPN examples weight of p * 1 / {num positives}
@@ -196,7 +196,7 @@ __C.TEST.RPN_PRE_NMS_TOP_N = 6000
 __C.TEST.RPN_POST_NMS_TOP_N = 300
 
 # Proposal height and width both need to be greater than RPN_MIN_SIZE (at orig image scale)
-__C.TEST.RPN_MIN_SIZE = 16
+__C.TEST.RPN_MIN_SIZE = 0
 
 # Testing mode, default to be 'nms', 'top' is slower but better
 # See report for details
@@ -263,10 +263,11 @@ __C.RNG_SEED = 3
 __C.EPS = 1e-14
 
 # Root directory of project
-__C.ROOT_DIR = '/home/ecust/gmy/faster-rcnn.pytorch-pytorch-1.0/faster-rcnn.pytorch-pytorch-1.0'
+__C.ROOT_DIR = "/workspace/fasterrcnn_txx"#####################
 
 # Data directory
-__C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
+# __C.DATA_DIR = osp.abspath(osp.join(__C.ROOT_DIR, 'data'))
+__C.DATA_DIR = "/workspace/fasterrcnn_txx/data/dataset"############################
 
 # Name (or path to) the matlab executable
 __C.MATLAB = 'matlab'

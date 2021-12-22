@@ -48,8 +48,10 @@ def parse_args():
 
     parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
     parser.add_argument('--dataset', dest='dataset', default='pascal_voc', type=str, help='training dataset')
-    parser.add_argument('--cfg', dest='cfg_file', default='cfgs/vgg16.yml', type=str, help='optional config file')
-    parser.add_argument('--net', dest='net', default='vgg16', type=str, help='vgg16, res50, res101, res152')
+    # parser.add_argument('--cfg', dest='cfg_file', default='cfgs/res50.yml', type=str, help='optional config file')
+    parser.add_argument('--cfg', dest='cfg_file', default='cfgs/res101.yml', type=str, help='optional config file')###################
+    # parser.add_argument('--net', dest='net', default='res50', type=str, help='vgg16, res50, res101, res152')
+    parser.add_argument('--net', dest='net', default='res101', type=str, help='vgg16, res50, res101, res152')####################
     parser.add_argument('--set', dest='set_cfgs', default=None, nargs=argparse.REMAINDER, help='set config keys')
     parser.add_argument('--load_dir', dest='load_dir', default="models", type=str, help='directory to load models')
     parser.add_argument('--cuda', dest='cuda', default=True,action='store_true', help='whether use CUDA')
@@ -258,8 +260,8 @@ def evaluation(name, net=None,vis=False,cuda=True,class_agnostic=False):
 
         sys.stdout.write('im_detect: {:d}/{:d} {:.3f}s {:.3f}s   \r' \
                          .format(i + 1, num_images, detect_time, nms_time))
-        # print('im_detect: {:d}/{:d} {:.3f}s {:.3f}s   \r' \
-        #       .format(i + 1, num_images, detect_time, nms_time))
+        print('im_detect: {:d}/{:d} {:.3f}s {:.3f}s   \r' \
+                         .format(i + 1, num_images, detect_time, nms_time))
         sys.stdout.flush()
 
         if vis:
@@ -283,7 +285,7 @@ if __name__ == '__main__':
 
     args = parse_args()
 
-    # print('Called with args:')
+    print('Called with args:')
     print(args)
 
     if torch.cuda.is_available() and not args.cuda:
@@ -292,25 +294,24 @@ if __name__ == '__main__':
     # np.random.seed(cfg.RNG_SEED)
     if args.dataset == "pascal_voc":
         args.imdb_name = "voc_2007_train"
-        args.imdbval_name = "voc_2007_val"
-        args.imdbtest_name = "voc_2007_test"
+        args.imdbval_name = "voc_2007_valid"
         args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
-    # elif args.dataset == "pascal_voc_0712":
-    #     args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
-    #     args.imdbval_name = "voc_2007_test"
-    #     args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
-    # elif args.dataset == "coco":
-    #     args.imdb_name = "coco_2014_train+coco_2014_valminusminival"
-    #     args.imdbval_name = "coco_2014_minival"
-    #     args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
-    # elif args.dataset == "imagenet":
-    #     args.imdb_name = "imagenet_train"
-    #     args.imdbval_name = "imagenet_val"
-    #     args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
-    # elif args.dataset == "vg":
-    #     args.imdb_name = "vg_150-50-50_minitrain"
-    #     args.imdbval_name = "vg_150-50-50_minival"
-    #     args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
+    elif args.dataset == "pascal_voc_0712":
+        args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
+        args.imdbval_name = "voc_2007_test"
+        args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
+    elif args.dataset == "coco":
+        args.imdb_name = "coco_2014_train+coco_2014_valminusminival"
+        args.imdbval_name = "coco_2014_minival"
+        args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
+    elif args.dataset == "imagenet":
+        args.imdb_name = "imagenet_train"
+        args.imdbval_name = "imagenet_val"
+        args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
+    elif args.dataset == "vg":
+        args.imdb_name = "vg_150-50-50_minitrain"
+        args.imdbval_name = "vg_150-50-50_minival"
+        args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
 
     args.cfg_file = "cfgs/{}_ls.yml".format(args.net) if args.large_scale else "cfgs/{}.yml".format(args.net)
 
@@ -319,8 +320,8 @@ if __name__ == '__main__':
     if args.set_cfgs is not None:
         cfg_from_list(args.set_cfgs)
 
-    # print('Using config:')
-    # pprint.pprint(cfg)
+    print('Using config:')
+    pprint.pprint(cfg)
 
 
     map=evaluation(name=args.imdbval_name,vis=args.vis,cuda=args.cuda,class_agnostic=args.class_agnostic)

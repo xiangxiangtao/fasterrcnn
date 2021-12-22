@@ -17,13 +17,13 @@ def prepare_roidb(imdb):
   each ground-truth box. The class with maximum overlap is also
   recorded.
   """
-
   roidb = imdb.roidb
   if not (imdb.name.startswith('coco')):
     sizes = [PIL.Image.open(imdb.image_path_at(i)).size
          for i in range(imdb.num_images)]
-         
+  print('**len(imdb.image_index)=',len(imdb.image_index))
   for i in range(len(imdb.image_index)):
+    
     roidb[i]['img_id'] = imdb.image_id_at(i)
     roidb[i]['image'] = imdb.image_path_at(i)
     if not (imdb.name.startswith('coco')):
@@ -97,22 +97,22 @@ def combined_roidb(imdb_names, training=True):
       imdb.append_flipped_images()
       print('done')
 
-    print('Preparing training data...')
-
+    # print('Preparing training data...')
     prepare_roidb(imdb)
     #ratio_index = rank_roidb_ratio(imdb)
-    print('done')
-
+    # print('done')
     return imdb.roidb
   
   def get_roidb(imdb_name):
     imdb = get_imdb(imdb_name)
-    print('Loaded dataset `{:s}` for training'.format(imdb.name))
+    print("**len(imdb.roidb)=",len(imdb.roidb))
+    print('Loaded dataset `{:s}`'.format(imdb.name))
     imdb.set_proposal_method(cfg.TRAIN.PROPOSAL_METHOD)
-    print('Set proposal method: {:s}'.format(cfg.TRAIN.PROPOSAL_METHOD))
+    # print('Set proposal method: {:s}'.format(cfg.TRAIN.PROPOSAL_METHOD))
     roidb = get_training_roidb(imdb)
     return roidb
-
+  print("-"*50)
+  print("running in roidb.py...")
   roidbs = [get_roidb(s) for s in imdb_names.split('+')]
   roidb = roidbs[0]
 

@@ -33,7 +33,6 @@ from lib.model.utils.net_utils import weights_normal_init, save_net, load_net, \
 from lib.model.faster_rcnn.vgg16 import vgg16
 from lib.model.faster_rcnn.resnet import resnet
 from eval import evaluation
-from logger import Logger
 
 def parse_args():
   """
@@ -41,9 +40,9 @@ def parse_args():
   """
   parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
   parser.add_argument('--dataset', dest='dataset',default='pascal_voc', type=str,help='training dataset')
-  parser.add_argument('--net', dest='net',default='res101', type=str, help='vgg16, res101')#########################
+  parser.add_argument('--net', dest='net',default='res50', type=str, help='vgg16, res101')
   parser.add_argument('--start_epoch', dest='start_epoch', default=1, type=int, help='starting epoch')
-  parser.add_argument('--epochs', dest='max_epochs',default=15, type=int,help='number of epochs to train')#########
+  parser.add_argument('--epochs', dest='max_epochs',default=10, type=int,help='number of epochs to train')
   parser.add_argument('--disp_interval', dest='disp_interval',default=100, type=int, help='number of iterations to display')
   parser.add_argument('--checkpoint_interval', dest='checkpoint_interval',default=10000, type=int, help='number of iterations to display')
   parser.add_argument('--save_dir', dest='save_dir', default="models",type=str, help='directory to save models')
@@ -51,13 +50,12 @@ def parse_args():
   parser.add_argument('--cuda', dest='cuda',default=True, action='store_true', help='whether use CUDA')
   parser.add_argument('--ls', dest='large_scale',action='store_true',help='whether use large imag scale')
   parser.add_argument('--mGPUs', dest='mGPUs',action='store_true',help='whether use multiple GPUs')
-  parser.add_argument('--bs', dest='batch_size',default=1, type=int, help='batch_size')###########################
+  parser.add_argument('--bs', dest='batch_size',default=1, type=int, help='batch_size')
   parser.add_argument('--cag', dest='class_agnostic', action='store_true',help='whether to perform class_agnostic bbox regression')
 
 # config optimization
-  parser.add_argument('--o', dest='optimizer', default="sgd", type=str,help='training optimizer')
-  # parser.add_argument('--lr', dest='lr',default=0.001, type=float,help='starting learning rate')#vgg16
-  parser.add_argument('--lr', dest='lr',default=0.001, type=float,help='starting learning rate')#res101##########################
+  parser.add_argument('--o', dest='optimizer', default="adam", type=str,help='training optimizer')
+  parser.add_argument('--lr', dest='lr',default=0.001, type=float,help='starting learning rate')
   parser.add_argument('--lr_decay_step', dest='lr_decay_step',default=5, type=int, help='step to do learning rate decay, unit is epoch')
   parser.add_argument('--lr_decay_gamma', dest='lr_decay_gamma',default=0.1, type=float, help='learning rate decay ratio')
 
@@ -70,8 +68,7 @@ def parse_args():
   parser.add_argument('--checkepoch', dest='checkepoch', default=1, type=int, help='checkepoch to load model')
   parser.add_argument('--checkpoint', dest='checkpoint',default=0, type=int,help='checkpoint to load model')
 # log and display
-#   parser.add_argument('--use_tfb', dest='use_tfboard',action='store_true',help='whether use tensorboard')
-  parser.add_argument('--use_tfb', dest='use_tfboard',default=True,help='whether use tensorboard')
+  parser.add_argument('--use_tfb', dest='use_tfboard',action='store_true',help='whether use tensorboard')
 
   parser.add_argument("--evaluation_interval", type=int, default=1, help="interval evaluations on validation set")
   args = parser.parse_args()
@@ -111,29 +108,27 @@ if __name__ == '__main__':
   print(args)
 
   if args.dataset == "pascal_voc":
-      # args.imdb_name = "voc_2007_train"
-      args.imdb_name = "voc_2007_trainval"
-      # args.imdbval_name = "voc_2007_val"#####################
-      args.imdbtest_name = "voc_2007_test"  #####################
+      args.imdb_name = "voc_2007_train"
+      args.imdbval_name = "voc_2007_valid"
       args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
-  # elif args.dataset == "pascal_voc_0712":
-  #     args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
-  #     args.imdbval_name = "voc_2007_test"
-  #     args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
-  # elif args.dataset == "coco":
-  #     args.imdb_name = "coco_2014_train+coco_2014_valminusminival"
-  #     args.imdbval_name = "coco_2014_minival"
-  #     args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
-  # elif args.dataset == "imagenet":
-  #     args.imdb_name = "imagenet_train"
-  #     args.imdbval_name = "imagenet_val"
-  #     args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '30']
-  # elif args.dataset == "vg":
-  #     # train sizes: train, smalltrain, minitrain
-  #     # train scale: ['150-50-20', '150-50-50', '500-150-80', '750-250-150', '1750-700-450', '1600-400-20']
-  #     args.imdb_name = "vg_150-50-50_minitrain"
-  #     args.imdbval_name = "vg_150-50-50_minival"
-  #     args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
+  elif args.dataset == "pascal_voc_0712":
+      args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
+      args.imdbval_name = "voc_2007_test"
+      args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
+  elif args.dataset == "coco":
+      args.imdb_name = "coco_2014_train+coco_2014_valminusminival"
+      args.imdbval_name = "coco_2014_minival"
+      args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
+  elif args.dataset == "imagenet":
+      args.imdb_name = "imagenet_train"
+      args.imdbval_name = "imagenet_val"
+      args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '30']
+  elif args.dataset == "vg":
+      # train sizes: train, smalltrain, minitrain
+      # train scale: ['150-50-20', '150-50-50', '500-150-80', '750-250-150', '1750-700-450', '1600-400-20']
+      args.imdb_name = "vg_150-50-50_minitrain"
+      args.imdbval_name = "vg_150-50-50_minival"
+      args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
 
   args.cfg_file = "cfgs/{}_ls.yml".format(args.net) if args.large_scale else "cfgs/{}.yml".format(args.net)
 
@@ -152,17 +147,14 @@ if __name__ == '__main__':
 
   # train set
   # -- Note: Use validation set and disable the flipped to enable faster loading.
-  cfg.TRAIN.USE_FLIPPED = True######################
-  # cfg.TRAIN.USE_FLIPPED = False
+  cfg.TRAIN.USE_FLIPPED = True
   cfg.USE_GPU_NMS = args.cuda
-  print("loading train data")
   imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name)
   train_size = len(roidb)
 
   print('{:d} roidb entries'.format(len(roidb)))
 
-  # output_dir = args.save_dir + "/" + args.net + "/" + args.dataset
-  output_dir = args.save_dir + "/" + args.net + "/" + "weight_"
+  output_dir = args.save_dir + "/" + args.net + "/" + args.dataset
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
@@ -231,15 +223,16 @@ if __name__ == '__main__':
     fasterRCNN.cuda()
       
   if args.optimizer == "adam":
-    lr = 0.001###################
+    lr = 0.001
     optimizer = torch.optim.Adam(params)
 
   elif args.optimizer == "sgd":
     optimizer = torch.optim.SGD(params, momentum=cfg.TRAIN.MOMENTUM)
 
   if args.resume:
-    load_name = os.path.join(output_dir,
-      'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
+    load_name = os.path.join(output_dir, 'faster_rcnn_' + cfg['POOLING_MODE'] + '_best.pth')
+    # load_name = os.path.join(output_dir,
+    #   'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
     print("loading checkpoint %s" % (load_name))
     checkpoint = torch.load(load_name)
     args.session = checkpoint['session']
@@ -257,19 +250,10 @@ if __name__ == '__main__':
   iters_per_epoch = int(train_size / args.batch_size)
 
   if args.use_tfboard:
-    # from tensorboardX import SummaryWriter
-    # logger = SummaryWriter("logs")
-    logger = Logger("logs/log_current")###########################
+    from tensorboardX import SummaryWriter
+    logger = SummaryWriter("logs")
 
   for epoch in range(args.start_epoch, args.max_epochs + 1):
-    print("-"*100)
-    print("epoch={}".format(epoch))
-    sum_loss=0
-    sum_loss_rpn_cls=0
-    sum_loss_rpn_box=0
-    sum_loss_rcnn_cls=0
-    sum_loss_rcnn_box=0
-
     # setting to train mode
     fasterRCNN.train()
     loss_temp = 0
@@ -326,60 +310,33 @@ if __name__ == '__main__':
           fg_cnt = torch.sum(rois_label.data.ne(0))
           bg_cnt = rois_label.data.numel() - fg_cnt
 
-        # print("[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" \
-        #                         % (args.session, epoch, step, iters_per_epoch, loss_temp, lr))
-        # print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end-start))
-        # print("\t\t\trpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" \
-        #               % (loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box))
-
-        # if args.use_tfboard:
-        #   info = {
-        #     'loss': loss_temp,
-        #     'loss_rpn_cls': loss_rpn_cls,
-        #     'loss_rpn_box': loss_rpn_box,
-        #     'loss_rcnn_cls': loss_rcnn_cls,
-        #     'loss_rcnn_box': loss_rcnn_box
-        #   }
-          # logger.add_scalars("logs_s_{}/losses".format(args.session), info, (epoch - 1) * iters_per_epoch + step)
-
+        print("[session %d][epoch %2d][iter %4d/%4d] loss: %.4f, lr: %.2e" \
+                                % (args.session, epoch, step, iters_per_epoch, loss_temp, lr))
+        print("\t\t\tfg/bg=(%d/%d), time cost: %f" % (fg_cnt, bg_cnt, end-start))
+        print("\t\t\trpn_cls: %.4f, rpn_box: %.4f, rcnn_cls: %.4f, rcnn_box %.4f" \
+                      % (loss_rpn_cls, loss_rpn_box, loss_rcnn_cls, loss_rcnn_box))
+        if args.use_tfboard:
+          info = {
+            'loss': loss_temp,
+            'loss_rpn_cls': loss_rpn_cls,
+            'loss_rpn_box': loss_rpn_box,
+            'loss_rcnn_cls': loss_rcnn_cls,
+            'loss_rcnn_box': loss_rcnn_box
+          }
+          logger.add_scalars("logs_s_{}/losses".format(args.session), info, (epoch - 1) * iters_per_epoch + step)
 
         loss_temp = 0
-
-        sum_loss += loss.item()
-        sum_loss_rpn_cls += rpn_loss_cls.item()
-        sum_loss_rpn_box += rpn_loss_box.item()
-        sum_loss_rcnn_cls += RCNN_loss_cls.item()
-        sum_loss_rcnn_box += RCNN_loss_bbox.item()
-
         start = time.time()
 
     if epoch % args.evaluation_interval == 0:
       print("\n---- Evaluating Model ----")
-      # map = evaluation(name=args.imdbval_name,net=fasterRCNN)############################################################
-      map = evaluation(name=args.imdbtest_name, net=fasterRCNN)
+      map = evaluation(name=args.imdbval_name,
+                       net=fasterRCNN
+                       )
 
-      # log
-      if args.use_tfboard:
-        sum_loss /= iters_per_epoch
-        sum_loss_rpn_cls /= iters_per_epoch
-        sum_loss_rpn_box /= iters_per_epoch
-        sum_loss_rcnn_cls /= iters_per_epoch
-        sum_loss_rcnn_box /= iters_per_epoch
-        logger_info = [
-          ('loss' , sum_loss),
-          ('loss_rpn_cls', sum_loss_rpn_cls),
-          ('loss_rpn_box', sum_loss_rpn_box),
-          ('loss_rcnn_cls', sum_loss_rcnn_cls),
-          ('loss_rcnn_box', sum_loss_rcnn_box),
-          ('test_map', map),###
-        ]
-        logger.list_of_scalars_summary(logger_info, epoch)
-
-      # if map > best_map:###
-      if True:
+      if map > best_map:
         # save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, epoch, step))
-        # save_name = os.path.join(output_dir, 'faster_rcnn_' + cfg['POOLING_MODE'] + '_best.pth')
-        save_name = os.path.join(output_dir, 'faster_rcnn_' + cfg['POOLING_MODE'] + '_{}.pth'.format(epoch))#########models/vgg16/
+        save_name = os.path.join(output_dir, 'faster_rcnn_' + cfg['POOLING_MODE'] + '_best.pth')
         save_checkpoint({
           'session': args.session,
           'epoch': epoch,
@@ -390,9 +347,9 @@ if __name__ == '__main__':
         }, save_name)
         print('save model: {}'.format(save_name))
 
-        best_map = map###
+        best_map = map
 
 
 
-  # if args.use_tfboard:
-  #   logger.close()
+  if args.use_tfboard:
+    logger.close()

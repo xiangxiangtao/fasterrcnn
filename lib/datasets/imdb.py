@@ -17,6 +17,7 @@ import scipy.sparse
 from lib.model.utils.config import cfg
 import pdb
 
+
 ROOT_DIR = osp.join(osp.dirname(__file__), '..', '..')
 
 class imdb(object):
@@ -78,7 +79,7 @@ class imdb(object):
 
   @property
   def cache_path(self):
-    cache_path = osp.abspath(osp.join(cfg.DATA_DIR, 'cache'))
+    cache_path = osp.abspath(osp.join(ROOT_DIR,'data','dataset','cache'))
     if not os.path.exists(cache_path):
       os.makedirs(cache_path)
     return cache_path
@@ -108,24 +109,63 @@ class imdb(object):
     raise NotImplementedError
 
   def _get_widths(self):
-    return [PIL.Image.open(self.image_path_at(i)).size[0]
+    # return [PIL.Image.open(self.image_path_at(i)).size[0]
+    #         for i in range(self.num_images)]
+    return [np.array(PIL.Image.open(self.image_path_at(i))).shape[1]
+            for i in range(self.num_images)]
+
+  def _get_heights(self):
+    # return [PIL.Image.open(self.image_path_at(i)).size[0]
+    #         for i in range(self.num_images)]
+    return [np.array(PIL.Image.open(self.image_path_at(i))).shape[0]
             for i in range(self.num_images)]
 
   def append_flipped_images(self):
     num_images = self.num_images
     widths = self._get_widths()
+    heights = self._get_heights()
     for i in range(num_images):
       boxes = self.roidb[i]['boxes'].copy()
+      # print(boxes)
+      # width = self.roidb[i]['width']
       oldx1 = boxes[:, 0].copy()
       oldx2 = boxes[:, 2].copy()
-      boxes[:, 0] = widths[i] - oldx2 - 1
-      boxes[:, 2] = widths[i] - oldx1 - 1
-      assert (boxes[:, 2] >= boxes[:, 0]).all()
+      boxes[:, 0] = widths[i] - oldx2
+      boxes[:, 2] = widths[i] - oldx1
+
+      if not ((boxes[:, 2] >= boxes[:, 0]).all()):
+        print(boxes)
+        print(self.image_path_at(i))
+      if not ((boxes[:, 3] >= boxes[:, 1]).all()):
+        print(boxes)
+        print(self.image_path_at(i))
       entry = {'boxes': boxes,
                'gt_overlaps': self.roidb[i]['gt_overlaps'],
                'gt_classes': self.roidb[i]['gt_classes'],
-               'flipped': True}
+               'flipped': 'horizontal'}
       self.roidb.append(entry)
+
+    # for i in range(num_images):
+    #   boxes = self.roidb[i]['boxes'].copy()
+    #   # print(boxes)
+    #   # width = self.roidb[i]['width']
+    #   oldx1 = boxes[:, 1].copy()
+    #   oldx2 = boxes[:, 3].copy()
+    #   boxes[:, 1] = heights[i] - oldx2
+    #   boxes[:, 3] = heights[i] - oldx1
+    #
+    #   if not ((boxes[:, 2] >= boxes[:, 0]).all()):
+    #     print(boxes)
+    #     print(self.image_path_at(i))
+    #   if not ((boxes[:, 3] >= boxes[:, 1]).all()):
+    #     print(boxes)
+    #     print(self.image_path_at(i))
+    #   entry = {'boxes': boxes,
+    #            'gt_overlaps': self.roidb[i]['gt_overlaps'],
+    #            'gt_classes': self.roidb[i]['gt_classes'],
+    #            'flipped': 'vertical'}
+    #   self.roidb.append(entry)
+    # self._image_index = self._image_index * 3
     self._image_index = self._image_index * 2
 
   # def evaluate_recall(self, candidate_boxes=None, thresholds=None,

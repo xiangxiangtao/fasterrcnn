@@ -16,6 +16,7 @@ from scipy.misc import imread
 from lib.model.utils.config import cfg
 from lib.model.utils.blob import prep_im_for_blob, im_list_to_blob
 import pdb
+import cv2
 def get_minibatch(roidb, num_classes):
   """Given a roidb, construct a minibatch sampled from it."""
   num_images = len(roidb)
@@ -62,8 +63,14 @@ def _get_image_blob(roidb, scale_inds):
   processed_ims = []
   im_scales = []
   for i in range(num_images):
-    #im = cv2.imread(roidb[i]['image'])
-    im = imread(roidb[i]['image'])
+    # im = cv2.imread(roidb[i]['image'])
+    im = imread(roidb[i]['image'])#500x400
+
+    if len(im.shape) != 2:
+      if im.shape[2]==4:######################
+        im = im[:,:,0:3]
+      # print("*")
+      # print(im.shape[2])
 
     if len(im.shape) == 2:
       im = im[:,:,np.newaxis]
@@ -72,8 +79,11 @@ def _get_image_blob(roidb, scale_inds):
     # rgb -> bgr
     im = im[:,:,::-1]
 
-    if roidb[i]['flipped']:
+    if roidb[i]['flipped'] =='horizontal':
       im = im[:, ::-1, :]
+    elif roidb[i]['flipped'] =='vertical':
+      im = im[::-1, :, :]
+
     target_size = cfg.TRAIN.SCALES[scale_inds[i]]
     im, im_scale = prep_im_for_blob(im, cfg.PIXEL_MEANS, target_size,
                     cfg.TRAIN.MAX_SIZE)
