@@ -208,3 +208,8 @@ output/*
 output_image/*
 result/*
 weight/*
+cache/
+logs/
+detection/
+weights/
+detect_when_computing_map/

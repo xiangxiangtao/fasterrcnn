@@ -41,7 +41,7 @@ from lib.model.faster_rcnn.resnet import resnet
 import pdb
 
 
-thresh = 0.8  #################################################################
+thresh = 0.9  #################################################################
 visual_score_thresh = thresh
 
 test_path_composite = '/home/ecust/txx/dataset/gas/IR/composite/composite_gas_gmy_500_400/test/image'
@@ -66,8 +66,8 @@ print("test_path=",test_path)
 #   class_names=['smoke']
 # print("class_names=",class_names)
 
-train_dataset="composite9.1"####################
-weight_path="models/res101/weight_fasterrcnn_composite9.1/faster_rcnn_align_6.pth"###########################
+train_dataset="composite16.2"####################
+weight_path="models/res101/weight_fasterrcnn_composite16.2_flipped/faster_rcnn_align_1.pth"###########################
 
 dataset_name=test_path.split("/")[-3]
 dataset_split=test_path.split("/")[-2]

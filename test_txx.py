@@ -310,8 +310,8 @@ if __name__ == '__main__':
 
     # map=evaluation(name=args.imdbval_name,vis=args.vis,cuda=args.cuda,class_agnostic=args.class_agnostic)
 
-    # name = args.imdbval_name
-    name=args.imdbtest_name################################################################################################
+    name = args.imdbval_name
+    # name=args.imdbtest_name################################################################################################
     vis=args.vis
     cuda=args.cuda
     class_agnostic=args.class_agnostic
@@ -374,14 +374,14 @@ if __name__ == '__main__':
 
     print('load model...')
     # weight_folder="models/vgg16/weight_fasterrcnn_composite6"###########################################################
-    weight_folder = "models/res101/weight_fasterrcnn_composite15.1_flipped"  ###########################################################
+    weight_folder = "models/res101/weight_fasterrcnn_composite18.10_flipped"  ###########################################################
     print("weight_folder={}".format(weight_folder))
     weight_list=os.listdir(weight_folder)
     print(weight_list)
     for weight in weight_list:
         # print(weight)
-        if weight.endswith(".pth"):#######################################################################################
-        # if weight.endswith(".pth") and weight in ["faster_rcnn_align_8.pth"]:
+        if weight.endswith(".pth"):
+        # if weight.endswith(".pth") and weight in ["faster_rcnn_align_3.pth"]:
             weight_path=os.path.join(weight_folder,weight)
 
             print("-"*100)

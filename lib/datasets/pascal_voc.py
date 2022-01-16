@@ -67,6 +67,20 @@ dataset_name_composite_12_point_1='composite_12.1_gmy'
 dataset_name_composite_13_point_1='composite_13.1_gmy'
 dataset_name_composite_14_point_1='composite_14.1_gmy'
 dataset_name_composite_15_point_1='composite_15.1_gmy'
+dataset_name_composite_16_point_1='composite_16.1_gmy'
+dataset_name_composite_16_point_2='composite_16.2_gmy'
+dataset_name_composite_16_point_3='composite_16.3_gmy'
+dataset_name_composite_17_point_2='composite_17.2_gmy'
+dataset_name_composite_18_point_1='composite_18.1_gmy'
+dataset_name_composite_18_point_2='composite_18.2_gmy'
+dataset_name_composite_18_point_3='composite_18.3_gmy'
+dataset_name_composite_18_point_4='composite_18.4_gmy'
+dataset_name_composite_18_point_5='composite_18.5_gmy'
+dataset_name_composite_18_point_6='composite_18.6_gmy'
+dataset_name_composite_18_point_8='composite_18.8_gmy'
+dataset_name_composite_18_point_9='composite_18.9_gmy'
+dataset_name_composite_18_point_10='composite_18.10_gmy'
+
 
 dataset_name_real_annotated='real_annotated'
 dataset_name_real_annotated_1='real_annotated_1'
@@ -74,12 +88,13 @@ dataset_name_real_annotated_2='real_annotated_2'
 dataset_name_real_3='real_3_gmy'
 dataset_name_real_5='real_5_gmy'
 dataset_name_real_6='real_6_gmy'
+dataset_name_real_7='real_7_gmy'
 dataset_name_real_annotated_gmy='real_annotated_gmy'
 dataset_name_real_annotated_gmy_all='real_annotated_gmy_all'
 dataset_name_real_annotated_all_split_gmy='real_annotated_all_split_gmy'
 
-dataset_name=dataset_name_composite_15_point_1###########################################
-# dataset_name=dataset_name_real_6
+# dataset_name=dataset_name_composite_18_point_10###########################################
+dataset_name=dataset_name_real_7
 # dataset_name=dataset_name_real_annotated_all_split_gmy
 
 
@@ -89,9 +104,14 @@ dataset_list0=[dataset_name_composite,dataset_name_composite_1,dataset_name_comp
                dataset_name_composite_9_point_4,dataset_name_composite_9_point_5,dataset_name_composite_9_point_6,dataset_name_composite_9_point_7,
                dataset_name_composite_9_point_8,dataset_name_composite_9_point_9,dataset_name_composite_9_point_10,dataset_name_composite_9_point_11,
                dataset_name_composite_9_point_12,dataset_name_composite_8_point_6,dataset_name_composite_10_point_1,dataset_name_composite_11_point_1,
-               dataset_name_composite_12_point_1,dataset_name_composite_13_point_1,dataset_name_composite_14_point_1,dataset_name_composite_15_point_1]
+               dataset_name_composite_12_point_1,dataset_name_composite_13_point_1,dataset_name_composite_14_point_1,dataset_name_composite_15_point_1,
+               dataset_name_composite_16_point_1,dataset_name_composite_16_point_2,dataset_name_composite_16_point_3,dataset_name_composite_17_point_2,
+               dataset_name_composite_18_point_1,dataset_name_composite_18_point_2,dataset_name_composite_18_point_4,dataset_name_composite_18_point_3,
+               dataset_name_composite_18_point_5,dataset_name_composite_18_point_6,dataset_name_composite_18_point_9,dataset_name_composite_18_point_8,
+               dataset_name_composite_18_point_10]
 dataset_list1=[dataset_name_real_annotated_gmy,dataset_name_real_annotated,dataset_name_real_annotated_1,dataset_name_real_annotated_2,
-               dataset_name_real_3,dataset_name_real_5,dataset_name_real_6,dataset_name_real_annotated_gmy_all,dataset_name_real_annotated_all_split_gmy]
+               dataset_name_real_3,dataset_name_real_5,dataset_name_real_6,dataset_name_real_7,
+               dataset_name_real_annotated_gmy_all,dataset_name_real_annotated_all_split_gmy]
 if dataset_name in dataset_list0:
     myclass='gas'
     img_ext='jpg'
@@ -113,7 +133,8 @@ class pascal_voc(imdb):
         imdb.__init__(self, 'voc_' + year + '_' + image_set)
         self._year = year
         if dataset_name in [dataset_name_real_annotated_all_split_gmy]:
-            image_set = "72"############################################################################################for real_annotated_all_split_gmy
+            # image_set = "all"############################################################################################for real_annotated_all_split_gmy
+            image_set = "17_env"
         self._image_set = image_set
         if dataset_name==dataset_name_real_annotated_gmy and (self._image_set in ["val","test"]):
           self._image_set="val"

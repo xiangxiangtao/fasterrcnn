@@ -43,7 +43,7 @@ def parse_args():
   parser.add_argument('--dataset', dest='dataset',default='pascal_voc', type=str,help='training dataset')
   parser.add_argument('--net', dest='net',default='res101', type=str, help='vgg16, res101')#########################
   parser.add_argument('--start_epoch', dest='start_epoch', default=1, type=int, help='starting epoch')
-  parser.add_argument('--epochs', dest='max_epochs',default=15, type=int,help='number of epochs to train')#########
+  parser.add_argument('--epochs', dest='max_epochs',default=10, type=int,help='number of epochs to train')#########
   parser.add_argument('--disp_interval', dest='disp_interval',default=100, type=int, help='number of iterations to display')
   parser.add_argument('--checkpoint_interval', dest='checkpoint_interval',default=10000, type=int, help='number of iterations to display')
   parser.add_argument('--save_dir', dest='save_dir', default="models",type=str, help='directory to save models')
