@@ -120,7 +120,7 @@ if __name__ == '__main__':
     raise Exception('There is no input directory for loading network from ' + input_dir)
   # load_name = os.path.join(input_dir,
   #   'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
-  load_name = os.path.join("/workspace/fasterrcnn_txx/weights/weight_fasterrcnn_composite6_pool_7_colab.pth")
+  load_name = os.path.join("weights/weight_fasterrcnn_res101_composite18.1_epoch1_step4000.pth")
 
   # initilize the network here.
   if args.net == 'vgg16':

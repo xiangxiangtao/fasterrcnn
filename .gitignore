@@ -203,13 +203,16 @@ lib/model/utils/bbox.c
 lib/pycocotools/_mask.c
 
 models/*
+!model/.gitkeep
 images/*
 output/*
 output_image/*
 result/*
-weight/*
+!weight/.gitkeep
 cache/
-logs/
-detection/
-weights/
+logs/*
+!logs/.gitkeep
+detection/*
+weights/*
+!weights/.gitkeep
 detect_when_computing_map/

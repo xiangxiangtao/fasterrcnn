@@ -41,8 +41,6 @@ from lib.model.faster_rcnn.resnet import resnet
 import pdb
 
 
-thresh = 0.9  #################################################################
-visual_score_thresh = thresh
 
 test_path_composite = '/home/ecust/txx/dataset/gas/IR/composite/composite_gas_gmy_500_400/test/image'
 test_path_composite_1 = '/home/ecust/txx/dataset/gas/IR/composite/composite_gas_1_gmy_500_400/test/image'
@@ -52,12 +50,13 @@ test_path_real_annotated = '/home/ecust/txx/dataset/gas/IR/real/real_annotated/t
 test_path_real_annotated_1 = '/home/ecust/txx/dataset/gas/IR/real/real_annotated_1/test/image'
 test_path_real_annotated_gmy = '/home/ecust/txx/dataset/gas/IR/real/real_annotated_gmy/val/image'
 test_path_real_6 = 'data/dataset/real/real_6_gmy/test/image'
+test_path_real_7 = 'data/dataset/real/real_7_gmy/val/image'
 test_path_real_annotated_all = '/workspace/fasterrcnn_txx/data/dataset/real/real_annotated_all_split_gmy/all/image'
 
 test_path_list1=[test_path_composite,test_path_composite_1,test_path_composite_2]
-test_path_list2=[test_path_real_annotated,test_path_real_annotated_1,test_path_real_annotated_gmy,test_path_real_6]
+test_path_list2=[test_path_real_annotated,test_path_real_annotated_1,test_path_real_annotated_gmy,test_path_real_6,test_path_real_7]
 
-test_path=test_path_real_annotated_all##########################################
+test_path=test_path_real_7##########################################
 print("test_path=",test_path)
 
 # if test_path in test_path_list1:
@@ -66,15 +65,10 @@ print("test_path=",test_path)
 #   class_names=['smoke']
 # print("class_names=",class_names)
 
-train_dataset="composite16.2"####################
-weight_path="models/res101/weight_fasterrcnn_composite16.2_flipped/faster_rcnn_align_1.pth"###########################
+train_dataset="composite18.1"####################
 
 dataset_name=test_path.split("/")[-3]
 dataset_split=test_path.split("/")[-2]
-
-output_folder_detection=os.path.join("detection","{}_{}".format(dataset_name,dataset_split),"fasterrcnn_train_on_{}_confthresh{}".format(train_dataset,thresh))
-os.makedirs(output_folder_detection, exist_ok=True)
-
 
 
 
@@ -98,7 +92,7 @@ def parse_args():
     parser.add_argument('--set', dest='set_cfgs',default=None,help='set config keys', nargs=argparse.REMAINDER)
     # parser.add_argument('--load_dir', dest='load_dir',default="models",help='directory to load models')
     parser.add_argument('--image_dir', dest='image_dir',default=test_path,help='directory to load images for demo')
-    parser.add_argument('--output_dir', dest='output_dir', default=output_folder_detection, help='directory to load images for demo')
+    # parser.add_argument('--output_dir', dest='output_dir', default=output_folder_detection, help='directory to load images for demo')
     parser.add_argument('--cuda', dest='cuda',default=True,action='store_true',help='whether use CUDA')
     parser.add_argument('--mGPUs', dest='mGPUs',action='store_true',help='whether use multiple GPUs')
     parser.add_argument('--cag', dest='class_agnostic',action='store_true',help='whether perform class_agnostic bbox regression')
@@ -109,6 +103,8 @@ def parse_args():
     parser.add_argument('--bs', dest='batch_size',default=1, type=int,help='batch_size')
     parser.add_argument('--vis', dest='vis',action='store_true',help='visualization mode')
 
+    parser.add_argument('--weight_path', dest='weight_path',default="weights/weight_fasterrcnn_res101_composite18.1_epoch1_step4000.pth",type=str,help='path to load weight')
+    parser.add_argument('--conf_thresh', dest='conf_thresh', default=0.7, type=float,help='conf_thresh for detecting')
     args = parser.parse_args()
     return args
 
@@ -166,13 +162,16 @@ if __name__ == '__main__':
     if args.set_cfgs is not None:
         cfg_from_list(args.set_cfgs)
 
+
+    output_dir=os.path.join("detection","det_fasterrcnn_{}_{}_confThresh{}_trainOn{}".format(dataset_name,dataset_split,args.conf_thresh,train_dataset))
+    os.makedirs(output_dir, exist_ok=True)
+
+
     cfg.USE_GPU_NMS = args.cuda
 
     # print('Using config:')
     print(cfg['POOLING_MODE'])
     np.random.seed(cfg.RNG_SEED)
-
-    os.makedirs(args.output_dir, exist_ok=True)
 
     # train set
     # -- Note: Use validation set and disable the flipped to enable faster loading.
@@ -182,7 +181,8 @@ if __name__ == '__main__':
     #     raise Exception('There is no input directory for loading network from ' + input_dir)
 
     # load_name = os.path.join(input_dir,'faster_rcnn_{}_best.pth'.format(cfg['POOLING_MODE']))
-    load_name=weight_path
+    print("weight_path={}".format(args.weight_path))
+    load_name=args.weight_path
 
     classes = np.asarray(['__background__',  # always index 0
                          'gas'])
@@ -348,7 +348,7 @@ if __name__ == '__main__':
             fig, ax = plt.subplots(1)
             ax.imshow(im2show)
         for j in range(1, len(classes)):
-            inds = torch.nonzero(scores[:, j] > thresh).view(-1)
+            inds = torch.nonzero(scores[:, j] > args.conf_thresh).view(-1)
             # if there is det
             if inds.numel() > 0:
                 cls_scores = scores[:, j][inds]
@@ -371,7 +371,7 @@ if __name__ == '__main__':
 
                         bbox = tuple(int(np.round(x)) for x in dets[i, :4])
                         score = dets[i, -1]
-                        if score > visual_score_thresh:
+                        if score > args.conf_thresh:
                             x1=bbox[0] if bbox[0]>0 else 0
                             y1=bbox[1] if bbox[1]>0 else 0
                             x2=bbox[2]
@@ -389,10 +389,10 @@ if __name__ == '__main__':
                             plt.text(
                                 x1,
                                 y1,
-                                s=classes[j]+" {:.2f}".format(score),
-                                color="red",
+                                s=classes[j]+": {:.2f}".format(score),
+                                color="yellow",
                                 verticalalignment="top",
-                                bbox={"color": color, "pad": 0},
+                                # bbox={"color": color, "pad": 0},
                             )
 
         misc_toc = time.time()
@@ -405,7 +405,7 @@ if __name__ == '__main__':
 
 
         if vis :
-            result_path = os.path.join(args.output_dir, img)
+            result_path = os.path.join(output_dir, img)
             plt.axis("off")
             plt.gca().xaxis.set_major_locator(NullLocator())
             plt.gca().yaxis.set_major_locator(NullLocator())
