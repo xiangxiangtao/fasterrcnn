@@ -1,4 +1,4 @@
-data/*
+
 
 # READ THIS BEFORE YOU REFACTOR ME
 #
@@ -203,12 +203,11 @@ lib/model/utils/bbox.c
 lib/pycocotools/_mask.c
 
 models/*
-!model/.gitkeep
+!models/.gitkeep
 images/*
 output/*
 output_image/*
 result/*
-!weight/.gitkeep
 cache/
 logs/*
 !logs/.gitkeep
@@ -216,3 +215,5 @@ detection/*
 weights/*
 !weights/.gitkeep
 detect_when_computing_map/
+data/*
+!data/.gitkeep
